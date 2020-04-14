@@ -18,11 +18,11 @@ func (t *Todo) String() string {
 
 // Post -
 type Post struct {
-	ID       int     `json:"id"`
-	UserID   int     `json:"userId"`
-	Title    string  `json:"title"`
-	Body     string  `json:"body"`
-	Comments []*Post `json:"posts,omitempty"`
+	ID       int        `json:"id"`
+	UserID   int        `json:"userId"`
+	Title    string     `json:"title"`
+	Body     string     `json:"body"`
+	Comments []*Comment `json:"comments,omitempty"`
 }
 
 // String -
@@ -51,13 +51,13 @@ type User struct {
 	Email    string   `json:"email"`
 	Address  *Address `json:"address,omitempty"`
 	Todos    []*Todo  `json:"todos,omitempty"`
-	Posts    []*Todo  `json:"posts,omitempty"`
-	Albums   []*Todo  `json:"albums,omitempty"`
+	Posts    []*Post  `json:"posts,omitempty"`
+	Albums   []*Album `json:"albums,omitempty"`
 }
 
 // Address -
 type Address struct {
-	Street      string            `json:"address"`
+	Street      string            `json:"street"`
 	Suite       string            `json:"suite,omitempty"`
 	City        string            `json:"city,omitempty"`
 	ZipCode     string            `json:"zipcode,omitempty"`

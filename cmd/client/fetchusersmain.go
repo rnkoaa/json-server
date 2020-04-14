@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	client2 "github.com/rnkoaa/json-server/cmd/client/client"
 	"github.com/rnkoaa/json-server/pkg/strings"
 )
 
-func doFetchUserTodoRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+func doFetchUserTodoRequests(ctx context.Context, client *client2.Client, userId int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -21,7 +22,7 @@ func doFetchUserTodoRequests(ctx context.Context, client *Client, userId int) <-
 
 	return responses
 }
-func doFetchUserPostRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+func doFetchUserPostRequests(ctx context.Context, client *client2.Client, userId int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -37,7 +38,7 @@ func doFetchUserPostRequests(ctx context.Context, client *Client, userId int) <-
 	return responses
 }
 
-func doFetchUserAlbumRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+func doFetchUserAlbumRequests(ctx context.Context, client *client2.Client, userId int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -53,7 +54,7 @@ func doFetchUserAlbumRequests(ctx context.Context, client *Client, userId int) <
 	return responses
 }
 
-func doFetchPostCommentsRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+func doFetchPostCommentsRequests(ctx context.Context, client *client2.Client, userId int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -69,7 +70,7 @@ func doFetchPostCommentsRequests(ctx context.Context, client *Client, userId int
 	return responses
 }
 
-func doFetchPhotosByAlbumRequests(ctx context.Context, client *Client, albumId int) <-chan Result {
+func doFetchPhotosByAlbumRequests(ctx context.Context, client *client2.Client, albumId int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -85,7 +86,7 @@ func doFetchPhotosByAlbumRequests(ctx context.Context, client *Client, albumId i
 	return responses
 }
 
-func doFetchUsersRequests(ctx context.Context, client *Client, urls []int) <-chan Result {
+func doFetchUsersRequests(ctx context.Context, client *client2.Client, urls []int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -103,7 +104,7 @@ func doFetchUsersRequests(ctx context.Context, client *Client, urls []int) <-cha
 	return responses
 }
 
-func doFetchTodoRequest(ctx context.Context, client *Client, urls []int) <-chan Result {
+func doFetchTodoRequest(ctx context.Context, client *client2.Client, urls []int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
@@ -121,7 +122,7 @@ func doFetchTodoRequest(ctx context.Context, client *Client, urls []int) <-chan 
 	return responses
 }
 
-func fetchAllUsers(ctx context.Context, client *Client) {
+func fetchAllUsers(ctx context.Context, client *client2.Client) {
 	userIdSize := 10
 
 	var req = make([]int, 0)
@@ -158,7 +159,7 @@ func fetchAllUsers(ctx context.Context, client *Client) {
 	}
 }
 
-func fetchAllTodos(ctx context.Context, client *Client) {
+func fetchAllTodos(ctx context.Context, client *client2.Client) {
 	todoSize := 10
 
 	var req = make([]int, 0)
@@ -167,18 +168,6 @@ func fetchAllTodos(ctx context.Context, client *Client) {
 	}
 
 	terminated := doFetchTodoRequest(ctx, client, req)
-
-	// go func() {
-	// 	// Cancel the operation after 1 second.
-	// 	time.Sleep(1 * time.Second)
-	// 	fmt.Println("Canceling doWork goroutine...")
-	// 	cancel()
-	// }()
-
-	// 	// var result User
-	// 	// json.NewDecoder(resp.Body).Decode(&result)
-	// 	fmt.Println(string(b))
-	// }
 
 	errCount := 0
 	for i := range terminated {
