@@ -1,0 +1,46 @@
+# https://stackoverflow.com/questions/36056615/what-is-the-advantage-of-sync-waitgroup-over-channels
+
+user
+  todos
+  posts
+    comments
+  albums
+    photos
+
+# waitgroup version
+var wg sync.WaitGroup
+func main() {
+        words := []string{ "foo", "bar", "baz" }
+
+        for _, word := range words {
+                wg.Add(1)
+                go func(word string) {
+                        time.Sleep(1 * time.Second)
+                        defer wg.Done()
+                        fmt.Println(word)
+                }(word)
+        }
+        // do concurrent things here
+
+        // blocks/waits for waitgroup
+        wg.Wait()
+}
+
+# Channel version
+func main() {
+        words = []string{ "foo", "bar", "baz" }
+        done := make(chan bool)
+        defer close(done)
+        for _, word := range words {
+                go func(word string) {
+                        time.Sleep(1 * time.Second)
+                        fmt.Println(word)
+                        done <- true
+                }(word)
+        }
+
+        // Do concurrent things here
+
+        // This blocks and waits for signal from channel
+        <-done
+}
