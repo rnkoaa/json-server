@@ -18,10 +18,11 @@ func (t *Todo) String() string {
 
 // Post -
 type Post struct {
-	ID     int    `json:"id"`
-	UserID int    `json:"userId"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
+	ID       int     `json:"id"`
+	UserID   int     `json:"userId"`
+	Title    string  `json:"title"`
+	Body     string  `json:"body"`
+	Comments []*Post `json:"posts,omitempty"`
 }
 
 // String -
@@ -31,9 +32,10 @@ func (p *Post) String() string {
 
 // Album -
 type Album struct {
-	UserID int    `json:"userId,omitempty"`
-	ID     int    `json:"id"`
-	Title  string `json:"title,omitempty"`
+	UserID int      `json:"userId,omitempty"`
+	ID     int      `json:"id"`
+	Title  string   `json:"title,omitempty"`
+	Photos []*Photo `json:"photos,omitempty"`
 }
 
 // String -
@@ -48,6 +50,9 @@ type User struct {
 	Username string   `json:"username"`
 	Email    string   `json:"email"`
 	Address  *Address `json:"address,omitempty"`
+	Todos    []*Todo  `json:"todos,omitempty"`
+	Posts    []*Todo  `json:"posts,omitempty"`
+	Albums   []*Todo  `json:"albums,omitempty"`
 }
 
 // Address -

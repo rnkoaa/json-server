@@ -3,45 +3,94 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"github.com/rnkoaa/json-server/pkg/strings"
 )
 
-// var (
-// 	httpClient *http.Client
-// )
+func doFetchUserTodoRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		res, _, err := client.Todo.GetByUser(ctx, userId)
+		result := Result{Error: err, Response: res}
+		select {
+		case <-ctx.Done():
+			return
+		case responses <- result:
+		}
+	}()
 
-// type Result struct {
-// 	Error    error
-// 	Response []byte
-// }
+	return responses
+}
+func doFetchUserPostRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		res, _, err := client.Post.GetByUser(ctx, userId)
+		result := Result{Error: err, Response: res}
+		select {
+		case <-ctx.Done():
+			return
+		case responses <- result:
+		}
+	}()
 
-func fetchUser(ctx context.Context, id int) ([]byte, error) {
-	url := fmt.Sprintf("http://localhost:8080/users/%d", id)
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
+	return responses
 }
 
-func doFetchUsersRequests(ctx context.Context, urls []int) <-chan Result {
+func doFetchUserAlbumRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		res, _, err := client.Album.GetByUser(ctx, userId)
+		result := Result{Error: err, Response: res}
+		select {
+		case <-ctx.Done():
+			return
+		case responses <- result:
+		}
+	}()
+
+	return responses
+}
+
+func doFetchPostCommentsRequests(ctx context.Context, client *Client, userId int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		res, _, err := client.Comment.GetByPost(ctx, userId)
+		result := Result{Error: err, Response: res}
+		select {
+		case <-ctx.Done():
+			return
+		case responses <- result:
+		}
+	}()
+
+	return responses
+}
+
+func doFetchPhotosByAlbumRequests(ctx context.Context, client *Client, albumId int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		res, _, err := client.Album.GetPhotos(ctx, albumId)
+		result := Result{Error: err, Response: res}
+		select {
+		case <-ctx.Done():
+			return
+		case responses <- result:
+		}
+	}()
+
+	return responses
+}
+
+func doFetchUsersRequests(ctx context.Context, client *Client, urls []int) <-chan Result {
 	responses := make(chan Result)
 	go func() {
 		defer close(responses)
 		for _, userId := range urls {
-			res, err := fetchUser(ctx, userId)
+			res, _, err := client.User.Get(ctx, userId)
 			result := Result{Error: err, Response: res}
 			select {
 			case <-ctx.Done():
@@ -54,17 +103,33 @@ func doFetchUsersRequests(ctx context.Context, urls []int) <-chan Result {
 	return responses
 }
 
-func fetchAllUsers() {
+func doFetchTodoRequest(ctx context.Context, client *Client, urls []int) <-chan Result {
+	responses := make(chan Result)
+	go func() {
+		defer close(responses)
+		for _, todoId := range urls {
+			res, _, err := client.Todo.Get(ctx, todoId)
+			result := Result{Error: err, Response: res}
+			select {
+			case <-ctx.Done():
+				return
+			case responses <- result:
+			}
+		}
+	}()
+
+	return responses
+}
+
+func fetchAllUsers(ctx context.Context, client *Client) {
 	userIdSize := 10
-	httpClient = &http.Client{}
-	ctx, _ := context.WithCancel(context.Background())
 
 	var req = make([]int, 0)
 	for i := 1; i <= userIdSize; i++ {
 		req = append(req, i)
 	}
 
-	terminated := doFetchUsersRequests(ctx, req)
+	terminated := doFetchUsersRequests(ctx, client, req)
 
 	// go func() {
 	// 	// Cancel the operation after 1 second.
@@ -89,6 +154,43 @@ func fetchAllUsers() {
 			}
 			continue
 		}
-		fmt.Println(string(i.Response))
+		fmt.Println(strings.Stringify(i.Response))
+	}
+}
+
+func fetchAllTodos(ctx context.Context, client *Client) {
+	todoSize := 10
+
+	var req = make([]int, 0)
+	for i := 1; i <= todoSize; i++ {
+		req = append(req, i)
+	}
+
+	terminated := doFetchTodoRequest(ctx, client, req)
+
+	// go func() {
+	// 	// Cancel the operation after 1 second.
+	// 	time.Sleep(1 * time.Second)
+	// 	fmt.Println("Canceling doWork goroutine...")
+	// 	cancel()
+	// }()
+
+	// 	// var result User
+	// 	// json.NewDecoder(resp.Body).Decode(&result)
+	// 	fmt.Println(string(b))
+	// }
+
+	errCount := 0
+	for i := range terminated {
+		if i.Error != nil {
+			fmt.Println(i.Error)
+			errCount++
+			if errCount >= 3 {
+				fmt.Println("Too many errors, breaking!")
+				break
+			}
+			continue
+		}
+		fmt.Println(strings.Stringify(i.Response))
 	}
 }
